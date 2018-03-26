@@ -1,0 +1,11 @@
+----NotificationsScreen				抽屉导航
+	|	
+	----CommonNavigation			主页面导航
+						|
+						----Other	其他详情等展示页面
+						|
+						----MainPageNavigation	 主页面
+											|
+											----Main    主页面-1
+											|	
+											----Sub		主页面-2	

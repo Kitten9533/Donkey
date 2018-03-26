@@ -3,10 +3,15 @@ import {
   Platform,
   StyleSheet,
   Text,
-  View
+  View,
+  Image,
 } from 'react-native';
 
 class Sub extends React.Component{
+	static navigationOptions = {
+   	    headerTitle: 'Sub',
+   	    drawerLabel: 'Sub',
+	};
 	render(){
 		return (
 			<View>

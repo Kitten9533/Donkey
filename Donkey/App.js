@@ -9,10 +9,13 @@ import {
   Platform,
   StyleSheet,
   Text,
-  View
+  View,
+  StatusBar,
 } from 'react-native';
 
-import CommonNavigation from './src/navigation/CommonNavigation';
+// import CommonNavigation from './src/navigation/CommonNavigation';
+import Colors from './src/constants/Colors';
+import MyApp from './src/navigation/NotificationsScreen';
 
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' +
@@ -37,12 +40,21 @@ type Props = {};
 export default class App extends Component<Props> {
   render() {
     return (
-      <CommonNavigation />
+      <View style={styles.box}>
+        <StatusBar
+          backgroundColor={Colors.grass}
+          barStyle="light-content"
+        />
+        <MyApp />
+      </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
+	box: {
+		flex: 1,
+	},
   container: {
     flex: 1,
     justifyContent: 'center',

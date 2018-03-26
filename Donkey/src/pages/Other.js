@@ -6,6 +6,9 @@ import {
   View
 } from 'react-native';
 class Other extends React.Component{
+	static navigationOptions = {
+	   	headerTitle: 'Other',
+	};
 	render(){
 		return (
 			<View>
