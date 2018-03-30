@@ -15,8 +15,10 @@ import {
 	StackNavigator,
 	TabNavigator
 } from 'react-navigation';
+import CardStackStyleInterpolator from 'react-navigation/src/views/CardStack/CardStackStyleInterpolator';
 import Other from '../pages/Other';
 import Sub from '../pages/Sub';
+import MvPlayer from '../components/MvPlayer';
 import LeftUserInfo from '../pages/LeftUserInfo';
 // import MainPageNavigation from '../navigation/MainPageNavigation';
 
@@ -62,6 +64,22 @@ import LeftUserInfo from '../pages/LeftUserInfo';
 // 	}
 // }
 
+//跳转过渡效果
+//forHorizontal:从右向左进入、forVertical:从下向上进入、forFadeFromBottomAndroid:从底部淡出。
+const TransitionConfiguration = () => ({
+	screenInterpolator: (sceneProps) => {
+		const {
+			scene
+		} = sceneProps;
+		const {
+			route
+		} = scene;
+		const params = route.params || {};
+		const transition = params.transition || 'forHorizontal';
+		return CardStackStyleInterpolator[transition](sceneProps);
+	},
+});
+
 const CommonNavigation = StackNavigator({
 	Other: {
 		screen: Other,
@@ -77,6 +95,9 @@ const CommonNavigation = StackNavigator({
 	},
 	LeftUserInfo: {
 		screen: LeftUserInfo,
+	},
+	MvPlayer: {
+		screen: MvPlayer,
 	},
 }, {
 	initialRouteName: 'TabNavigation',
@@ -94,6 +115,7 @@ const CommonNavigation = StackNavigator({
 		},
 		//返回箭头的颜色
 		headerTintColor: Colors.navigation,
+		transitionConfig: TransitionConfiguration,
 	},
 })
 

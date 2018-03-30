@@ -88,7 +88,7 @@ const MyApp = DrawerNavigator({
     //   screen: Sub,
     // },
 }, {
-    // drawerBackgroundColor: Colors.grass,
+    drawerBackgroundColor: Colors.navigation,
 });
 
 export default MyApp

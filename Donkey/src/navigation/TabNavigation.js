@@ -10,7 +10,9 @@ import {
 	Image,
 } from 'react-native'
 import Colors from '../constants/Colors';
-import {TabNavigator} from 'react-navigation';
+import {
+	TabNavigator
+} from 'react-navigation';
 import First from '../pages/First';
 import Second from '../pages/Second';
 import Third from '../pages/Third';
@@ -34,37 +36,39 @@ const TabNavigation = TabNavigator({
 			title: 'Third',
 		},
 	},
-},{
+}, {
 	initialRouteName: 'First',
 	tabBarPosition: 'top',
 	tabBarOptions: {
 		style: {
-		    backgroundColor: Colors.navigation,
-    	},
-    	tabStyle: {//View
-    		
-    	},
-    	labelStyle: {
-    		color: Colors.textBlack,
-    	},
-   		indicatorStyle: {
+			backgroundColor: Colors.navigation,
+		},
+		tabStyle: { //View
+
+		},
+		labelStyle: {
+			color: Colors.textBlack,
+		},
+		indicatorStyle: {
 			backgroundColor: Colors.grass,
 		},
 	},
 })
 
 TabNavigation.navigationOptions = props => {
-	const {navigation} = props;
+	const {
+		navigation
+	} = props;
 	return {
 		headerTitle: 'HOME PAGE', //标题
-	    headerTitleStyle: { //标题字体
-	  		color: Colors.navigation,
-  	},
-	   	headerStyle: { //标题样式
-	   		backgroundColor: Colors.grass,
-	   	},
-	   	headerLeft: (
-	   		<TouchableOpacity
+		headerTitleStyle: { //标题字体
+			color: Colors.navigation,
+		},
+		headerStyle: { //标题样式
+			backgroundColor: Colors.grass,
+		},
+		headerLeft: (
+			<TouchableOpacity
 	   			onPress={() => navigation.navigate('DrawerOpen')}
 	   			>
 		   		<Image
@@ -72,14 +76,14 @@ TabNavigation.navigationOptions = props => {
 			        style={styles.icon}
 		    	/>
 		    </TouchableOpacity>
-	   	),
-	   	headerRight: (
-	   		<Text style={styles.headerRightText}
+		),
+		headerRight: (
+			<Text style={styles.headerRightText}
 	   			onPress={() => navigation.navigate('Other')}
 			>
 	   			Go
 	   		</Text>
-	    ),
+		),
 	}
 };
 
@@ -90,7 +94,7 @@ const styles = StyleSheet.create({
 		marginLeft: 20,
 		marginRight: 8,
 	},
-	headerRightText:{
+	headerRightText: {
 		color: Colors.textWhite,
 		fontSize: 18,
 		marginRight: 20,
