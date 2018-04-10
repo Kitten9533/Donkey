@@ -27,7 +27,6 @@ class TopMvList extends React.Component {
 		this._renderListView = this._renderListView.bind(this);
 		this._endReached = this._endReached.bind(this);
 		this._getLoading = this._getLoading.bind(this);
-		this.alert1 = this.alert1.bind(this);
 		this._toPlayer = this._toPlayer.bind(this);
 		const ds = new ListView.DataSource({
 			rowHasChanged: (r1, r2) => r1 !== r2
@@ -49,7 +48,6 @@ class TopMvList extends React.Component {
 			...{
 				dataSource: ds.cloneWithRows([{}])
 			},
-			firstLoad: false,
 		};
 	}
 
@@ -83,7 +81,8 @@ class TopMvList extends React.Component {
 					<View style={styles.contentBox}>
 						<Text  
 							style={styles.contentName}
-							numberOfLines={2}>{rowData.name}</Text>
+							numberOfLines={2}>{rowData.name}
+						</Text>
 					</View>
 				</TouchableOpacity>
 			</View>
@@ -140,10 +139,6 @@ class TopMvList extends React.Component {
 			);
 		}
 		return loading;
-	}
-
-	alert1() {
-		alert(1);
 	}
 
 	_renderFooter() {

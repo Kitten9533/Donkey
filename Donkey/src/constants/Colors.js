@@ -1,4 +1,4 @@
-export default{
+export default {
 	green: '#84cfcb',
 	yellow: '#ffed90',
 	brown: '#efe1d4',
@@ -12,4 +12,6 @@ export default{
 	textTitle: '#333333',
 	warm: '#eef5db',
 	blue: '#426ffe',
+	backgroundColor: '#efeff4',
+	rowColor: '#F6F6F6', //比白色稍微灰点。比背景色白点的。。。
 }
