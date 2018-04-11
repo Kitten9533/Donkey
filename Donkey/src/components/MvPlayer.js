@@ -12,6 +12,8 @@ import {
 	TouchableOpacity,
 	TouchableHighlight,
 	ScrollView,
+	FlatList,
+	SectionList,
 } from 'react-native';
 
 import Video from 'react-native-video';
@@ -19,8 +21,13 @@ import Layout from '../constants/Layout';
 import Colors from '../constants/Colors';
 
 import {
-	getMvDetail
+	getMvDetail,
+	getMvComment,
 } from '../services/getResources';
+import {
+	getDateDiff
+} from '../common/apis';
+import SectionTitle from '../common/SectionTitle';
 import SimiMv from '../components/SimiMv';
 import Comments from '../components/Comments';
 
@@ -38,12 +45,19 @@ class MvPlayer extends React.Component {
 				isPlaying: false,
 				playingRate: 1.0,
 				firstLoad: true,
+				firstPage: true,
 				name: '',
 				artistName: '',
 				artistId: '',
 				briefDesc: '',
 				desc: '',
 				data: {},
+				isLoading: false,
+				hotComments: [],
+				comments: [],
+				offset: 0,
+				limit: 20,
+				canScroll: false,
 			},
 		};
 		this.getMvDetail = this.getMvDetail.bind(this);
@@ -52,6 +66,9 @@ class MvPlayer extends React.Component {
 		this.onEnd = this.onEnd.bind(this);
 		this.getShade = this.getShade.bind(this);
 		this.videoPause = this.videoPause.bind(this);
+		this._renderItem = this._renderItem.bind(this);
+		this._renderHotComments = this._renderHotComments.bind(this);
+		this._renderEmptyView = this._renderEmptyView.bind(this);
 	}
 
 	static navigationOptions = ({
@@ -115,6 +132,48 @@ class MvPlayer extends React.Component {
 		});
 	}
 
+	async mvComment() {
+		const {
+			params
+		} = this.props.navigation.state;
+		if (!params.mvId) {
+			alert('Error in getting mvId');
+			return;
+		}
+		this.setState({
+			isLoading: true,
+		});
+		let {
+			offset,
+			limit
+		} = this.state;
+		let res = await getMvComment(params.mvId, offset * limit, limit);
+		let {
+			hotComments,
+			comments,
+			total
+		} = res;
+		let oldComments = this.state.comments;
+		if (this.state.offset == 0) {
+			this.setState({
+				firstPage: false,
+				hotComments: hotComments,
+				comments: comments,
+				total: total,
+				isLoading: false,
+				canScroll: true,
+			});
+		} else {
+			this.setState({
+				firstPage: false,
+				comments: oldComments.concat(comments),
+				isLoading: false,
+				canScroll: true,
+			});
+		}
+
+	}
+
 	componentDidMount() {
 		const {
 			params
@@ -124,6 +183,7 @@ class MvPlayer extends React.Component {
 			mvName: params.mvName,
 			mvId: params.mvId,
 		});
+		this.mvComment();
 	}
 
 	componentWillMount() {
@@ -168,6 +228,9 @@ class MvPlayer extends React.Component {
 			width: this.state.videoWidth,
 			height: this.state.videoHeight
 		};
+		if (!this.state.mvUrl) {
+			return null;
+		}
 		return (
 			<Video source={{uri: this.state.mvUrl}}   // Can be a URL or a local file. 
 		       	ref={(ref) => {
@@ -241,7 +304,45 @@ class MvPlayer extends React.Component {
 		}
 	}
 
-	render() {
+	_renderHotComments() {
+		let list = this.state.hotComments;
+		if (list.length > 0) {
+			var dom = this._getHotComments(list);
+			return (
+				<View>
+					<SectionTitle content={`精彩评论`}/>
+					{dom}
+				</View>
+			);
+		}
+		return null;
+	}
+
+	_getHotComments(list) {
+		var dom = [];
+		for (let i = 0, len = list.length; i < len; i++) {
+			let item = list[i];
+			dom.push(
+				<View key={i} style={styles.row}>
+			       	<Image style={styles.thumb} source={{uri: item.user.avatarUrl}} resizeMode={Image.resizeMode.cover}/>
+			       	<View style={styles.textBox}>
+				        <Text style={styles.text} numberOfLines={1}>
+			        		{item.user.nickname || ''}	
+				        </Text>
+				        <Text style={[styles.text, {color: '#808080', fontSize: 9,}]} numberOfLines={1}>
+				        	{!!item.time ? getDateDiff(item.time) : ''}
+				        </Text>
+				      	<Text style={styles.textContent}>
+			        		{item.content || ''}	
+				        </Text>
+				    </View>
+			    </View>
+			);
+		}
+		return dom;
+	}
+
+	_renderHeader = () => {
 		const {
 			params
 		} = this.props.navigation.state;
@@ -252,8 +353,13 @@ class MvPlayer extends React.Component {
 			width: this.state.videoWidth,
 			height: this.state.videoHeight
 		};
+		let hotComments = this._renderHotComments();
+		let total = this.state.total;
+		let title = (
+			<SectionTitle content={`最新评论(${total})`}/>
+		);
 		return (
-			<ScrollView style={styles.container}>
+			<View style={styles.container}>
 				<StatusBar hidden={true} />
 				<TouchableHighlight style={[styles.videoBox, defaultSize]} onPress={() => {this._setPlaying()}} underlayColor='#fff'>
 					<View>
@@ -265,8 +371,107 @@ class MvPlayer extends React.Component {
 				</TouchableOpacity>
 				<MvInfo {...this.state}/>
 				<SimiMv mvId={this.props.navigation.state.params.mvId} navigation={this.props.navigation} videoPause={this.videoPause}/>
-				<Comments mvId={this.props.navigation.state.params.mvId} navigation={this.props.navigation} videoPause={this.videoPause}/>
-			</ScrollView>
+				{hotComments}
+				{title}
+			</View>
+		);
+	}
+
+	_renderEmptyView = () => {
+		return (
+			<View style={styles.noList}>
+				<Text style={styles.noListText}>
+					暂无评论,欢迎抢沙发
+				</Text>
+			</View>
+		);
+	}
+
+	onEndReached = () => {
+		if (!this.state.canScroll) {
+			return;
+		}
+		let offset = this.state.offset;
+		offset++;
+		this.setState({
+			canScroll: false,
+			offset: offset
+		});
+		this.mvComment();
+	}
+
+	_renderItem = ({
+		item,
+		index
+	}) => {
+		if (Object.keys(item).length == 0) {
+			return null;
+		}
+		let {
+			id,
+			name
+		} = item;
+		return (
+			<View style={styles.row}>
+		       	<Image style={styles.thumb} source={{uri: item.user.avatarUrl}} resizeMode={Image.resizeMode.cover}/>
+		       	<View style={styles.textBox}>
+			        <Text style={styles.text} numberOfLines={1}>
+		        		{item.user.nickname || ''}	
+			        </Text>
+			        <Text style={[styles.text, {color: '#808080', fontSize: 9,}]} numberOfLines={1}>
+			        	{!!item.time ? getDateDiff(item.time) : ''}
+			        </Text>
+			      	<Text style={styles.textContent}>
+		        		{item.content || ''}	
+			        </Text>
+			    </View>
+		    </View>
+		);
+	}
+
+	_flatList;
+	_keyExtractor = (item, index) => index.toString();
+
+	render() {
+		const {
+			params
+		} = this.props.navigation.state;
+		let myMvBox = this.getMvBox();
+		// let myShade = null;
+		let myShade = this.getShade();
+		let defaultSize = {
+			width: this.state.videoWidth,
+			height: this.state.videoHeight
+		};
+		// return (
+		// 	<ScrollView style={styles.container}>
+		// 		<StatusBar hidden={true} />
+		// 		<TouchableHighlight style={[styles.videoBox, defaultSize]} onPress={() => {this._setPlaying()}} underlayColor='#fff'>
+		// 			<View>
+		// 				{myMvBox}
+		// 			</View>
+		// 		</TouchableHighlight>
+		// 		<TouchableOpacity style={[styles.videoModal ,defaultSize]} onPress={() => {this._setPlaying()}}>
+		// 			{myShade}
+		// 		</TouchableOpacity>
+		// 		<MvInfo {...this.state}/>
+		// 		<SimiMv mvId={this.props.navigation.state.params.mvId} navigation={this.props.navigation} videoPause={this.videoPause}/>
+		// 		<Comments mvId={this.props.navigation.state.params.mvId} navigation={this.props.navigation} videoPause={this.videoPause}/>
+		// 	</ScrollView>
+		// );
+		return (
+			<View style={styles.container}>
+				<FlatList
+					ref={(flatlist)=>{this.flatlist = flatlist}}
+				    data={this.state.comments}
+				    ListHeaderComponent={this._renderHeader}
+				    renderItem={this._renderItem}
+				    keyExtractor={this._keyExtractor}
+				    onEndReachedThreshold={0.5}
+				    onEndReached={this.onEndReached}
+				    ListEmptyComponent={this._renderEmptyView}
+				/>
+			</View>
 		);
 	}
 }
@@ -360,6 +565,59 @@ var styles = StyleSheet.create({
 	textRight: {
 		marginLeft: 50,
 	},
+	titleBox: {
+		backgroundColor: '#efeff4',
+		paddingLeft: 5,
+		paddingRight: 5,
+	},
+	title: {
+		lineHeight: 27,
+		fontSize: 12,
+		color: Colors.textBlack,
+	},
+	row: {
+		flexDirection: 'row',
+		justifyContent: 'center',
+		padding: 10,
+		backgroundColor: '#F6F6F6',
+		borderColor: Colors.backgroundColor,
+		borderBottomWidth: 1,
+	},
+	thumb: {
+		marginTop: 0,
+		width: 30,
+		height: 30,
+		borderRadius: 30,
+	},
+	textBox: {
+		flex: 1,
+		paddingTop: 0,
+		paddingLeft: 0,
+		flexDirection: 'column',
+		justifyContent: 'flex-start',
+	},
+	text: {
+		fontSize: 10,
+		padding: 2,
+		start: 6,
+		color: Colors.textBlack,
+	},
+	textContent: {
+		fontSize: 12,
+		start: 6,
+		color: Colors.textBlack,
+	},
+	noList: {
+		height: 100,
+		flexDirection: 'column',
+		alignItems: 'center',
+		justifyContent: 'center',
+		backgroundColor: Colors.rowColor,
+	},
+	noListText: {
+		color: '#808080',
+		fontSize: 12,
+	}
 });
 
 export default MvPlayer;
