@@ -18,7 +18,7 @@ import {
 import CardStackStyleInterpolator from 'react-navigation/src/views/CardStack/CardStackStyleInterpolator';
 import Other from '../pages/Other';
 import Sub from '../pages/Sub';
-import MvPlayer from '../components/MvPlayer';
+import MvPlayer from '../pages/MvPlayer';
 import LeftUserInfo from '../pages/LeftUserInfo';
 // import MainPageNavigation from '../navigation/MainPageNavigation';
 

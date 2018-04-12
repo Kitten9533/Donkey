@@ -14,4 +14,5 @@ export default {
 	blue: '#426ffe',
 	backgroundColor: '#efeff4',
 	rowColor: '#F6F6F6', //比白色稍微灰点。比背景色白点的。。。
+	DimGray: '#696969'
 }

@@ -37,6 +37,9 @@ class SimiMv extends React.Component {
 		const ds = new ListView.DataSource({
 			rowHasChanged: (r1, r2) => r1 !== r2
 		});
+		let {
+			mvId
+		} = this.props;
 		this.state = {
 			...this.props,
 			...{
@@ -44,6 +47,7 @@ class SimiMv extends React.Component {
 				// data: [{}],
 				data: [],
 			},
+			mvId: mvId,
 		};
 		this.SimiMv = this.SimiMv.bind(this);
 		this._renderListView = this._renderListView.bind(this);
@@ -70,12 +74,24 @@ class SimiMv extends React.Component {
 		// this.listener && this.listener.remove();
 	}
 
+	componentWillReceiveProps(nextProps) {
+		let oldMvId = this.props.mvId;
+		let newMvId = nextProps.mvId;
+		if (oldMvId == newMvId) {
+			return;
+		}
+		this.setState({
+			mvId: newMvId,
+		});
+		this.SimiMv();
+	}
+
 	async SimiMv() {
-		if (!this.props.mvId) {
+		if (!this.state.mvId) {
 			alert('Error in getting mvId');
 			return;
 		}
-		var res = await getSimiMv(this.props.mvId);
+		var res = await getSimiMv(this.state.mvId);
 		if (res.mvs.length > 0) {
 			res.mvs.slice(0, 5);
 			this.setState({
@@ -86,16 +102,16 @@ class SimiMv extends React.Component {
 
 	_doClick(id, name) {
 		//跳转页面前 暂停当前视频
-		this.props.videoPause();
-		const {
-			navigate,
-			replace,
-			pop,
-		} = this.props.navigation;
-		navigate('MvPlayer', {
-			mvId: id,
-			mvName: name
-		});
+		this.props.toNextVideo(id, name);
+		// const {
+		// 	navigate,
+		// 	replace,
+		// 	pop,
+		// } = this.props.navigation;
+		// navigate('MvPlayer', {
+		// 	mvId: id,
+		// 	mvName: name
+		// });
 		// setTimeout((function() {
 		// 	pop(1)
 		// }), 0);
