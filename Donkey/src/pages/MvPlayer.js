@@ -15,6 +15,7 @@ import {
 	FlatList,
 	SectionList,
 	ActivityIndicator,
+	LayoutAnimation,
 } from 'react-native';
 
 import Video from 'react-native-video';
@@ -91,6 +92,7 @@ class MvPlayer extends React.Component {
 	})
 
 	componentWillMount() {
+		LayoutAnimation.spring();
 		this.getMvDetail();
 		this.mvComment();
 	}
@@ -311,6 +313,7 @@ class MvPlayer extends React.Component {
 		this.setState({
 			gettingData: true,
 		});
+		LayoutAnimation.spring();
 		await this.setParams(newId, newName);
 		this.getMvDetail();
 		this.mvComment();
